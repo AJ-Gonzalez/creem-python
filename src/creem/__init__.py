@@ -42,7 +42,7 @@ from .webhooks import (
     verify_signature,
 )
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 __all__ = [
     "Creem",

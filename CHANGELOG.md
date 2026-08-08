@@ -25,7 +25,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   PyPI publishing via trusted publishing.
 
 
-## [Unreleased]
+## [0.2.1] - 2026-08-08
 
 ### Added
 - Release tooling: scripts/release.sh with --dry-run, changelog, and a CI
@@ -35,3 +35,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - Both dict-params and keyword-only call styles on all body methods.
 - pylint now covers examples/ (CI and local).
+
+## [Unreleased]
+
+### Added
+
+### Changed
