@@ -2,15 +2,17 @@
 # Release the SDK: bump the version, finalize the changelog, tag, and push.
 #
 # Usage:
-#   ./scripts/release.sh 0.2.0
+#   ./scripts/release.sh 0.2.0 ["Nickname"]
 #
 # What it does:
 #   1. Updates the version in pyproject.toml and src/creem/__init__.py
-#   2. Renames the CHANGELOG [Unreleased] section to the new version
+#   2. Renames the CHANGELOG [Unreleased] section to the new version,
+#      optionally with a release nickname: `## [0.2.0] - date — "Nickname"`
 #   3. Commits, tags vX.Y.Z, and pushes branch + tag
 #
-# CI then runs the quality gate (lint, type check, tests, build) and, on tag
-# pushes, publishes to Test PyPI and PyPI. This script does not run tests.
+# CI then runs the quality gate (lint, type check, tests, build), creates a
+# GitHub Release titled with the nickname, and publishes to Test PyPI and
+# PyPI. This script does not run tests.
 #
 # Pass --dry-run to print what would change without touching the repo.
 SECONDS=0
@@ -21,7 +23,8 @@ if [ "${1:-}" = "--dry-run" ]; then
     shift
 fi
 
-VERSION="${1:?usage: ./scripts/release.sh [--dry-run] <version>}"
+VERSION="${1:?usage: ./scripts/release.sh [--dry-run] <version> [\"Nickname\"]}"
+NICKNAME="${2:-}"
 TAG="v$VERSION"
 
 if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -47,15 +50,24 @@ fi
 
 sed -i "s/^version = \".*\"/version = \"$VERSION\"/" pyproject.toml
 sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" src/creem/__init__.py
-sed -i "0,/^## \[Unreleased\]/s//## [$VERSION] - $(date +%Y-%m-%d)/" CHANGELOG.md
-cat >> CHANGELOG.md <<'EOF'
-
-## [Unreleased]
-
-### Added
-
-### Changed
-EOF
+HEADING="## [$VERSION] - $(date +%Y-%m-%d)"
+if [ -n "$NICKNAME" ]; then
+    HEADING="$HEADING — \"$NICKNAME\""
+fi
+sed -i "0,/^## \[Unreleased\]/s//$HEADING/" CHANGELOG.md
+# Insert a fresh Unreleased section at the top (newest-first order).
+awk '
+    !inserted && /^## \[/ {
+        print "## [Unreleased]"
+        print ""
+        print "### Added"
+        print ""
+        print "### Changed"
+        print ""
+        inserted = 1
+    }
+    { print }
+' CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
 
 git add pyproject.toml src/creem/__init__.py CHANGELOG.md
 git commit -m "release $VERSION"

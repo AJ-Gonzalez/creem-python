@@ -95,3 +95,31 @@ jobs:
           path: dist
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  release-github:
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # create the GitHub Release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute release title and body from the changelog
+        id: release
+        run: |
+          HEADING="$(grep '^## \[' CHANGELOG.md | grep -v '^## \[Unreleased\]' | head -1)"
+          VERSION="$(echo "$HEADING" | sed -n 's/^## \[\([0-9.]*\)\].*/\1/p')"
+          NICKNAME="$(echo "$HEADING" | sed -n 's/.*— "\(.*\)".*/\1/p')"
+          if [ -n "$NICKNAME" ]; then
+            TITLE="v$VERSION — $NICKNAME"
+          else
+            TITLE="v$VERSION"
+          fi
+          BODY="$(awk 'BEGIN { n = 0 } /^## \[Unreleased\]/ { next } /^## \[/ { n++; if (n == 1) { next } } n == 1 { print } n > 1 { exit }' CHANGELOG.md)"
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "body=$BODY" >> "$GITHUB_OUTPUT"
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.release.outputs.title }}
+          body: ${{ steps.release.outputs.body }}
+          generate_release_notes: false
