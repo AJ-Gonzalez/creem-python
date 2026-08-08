@@ -268,3 +268,21 @@ def test_retry_sends_same_body_and_headers(monkeypatch: pytest.MonkeyPatch) -> N
     assert captured[0].headers["X-Custom"] == captured[1].headers["X-Custom"] == "v"
     assert len(sleeps) == 1
     client.close()
+
+
+def test_http_date_retry_after_falls_back_to_backoff(monkeypatch: pytest.MonkeyPatch) -> None:
+    attempts = 0
+    sleeps = sleep_capture(monkeypatch)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            return httpx.Response(429, headers={"Retry-After": "Wed, 21 Oct 2026 07:28:00 GMT"}, json={})
+        return httpx.Response(200, json={})
+
+    client = make_client(handler)
+    client.request("GET", "/v1/products")
+    assert attempts == 2
+    assert 0.5 * 0.5 <= sleeps[0] <= 0.5  # plain backoff, no crash
+    client.close()

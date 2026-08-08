@@ -213,3 +213,15 @@ def test_context_manager_closes_client() -> None:
     with Creem("creem_test_key", http_client=TrackingClient(transport=transport)):
         pass
     assert closed
+
+
+def test_unknown_status_raises_generic_api_error() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(418, json={"error": "Teapot"})
+
+    client = make_client(handler)
+    with pytest.raises(CreemAPIError) as excinfo:
+        client.request("GET", "/v1/products")
+    assert excinfo.value.status == 418
+    assert not isinstance(excinfo.value, CreemValidationError)
+    client.close()

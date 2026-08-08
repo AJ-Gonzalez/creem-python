@@ -205,3 +205,20 @@ def _first_n(iterator: Any, n: int) -> list[Any]:
         if len(result) >= n:
             break
     return result
+
+
+def test_customers_iter_all() -> None:
+    pages = [[{"id": "cust_1"}], [{"id": "cust_2"}]]
+    requests, client = make_paginated_client(pages)
+    customers = list(client.customers.iter_all())
+    assert [c["id"] for c in customers] == ["cust_1", "cust_2"]
+    assert requests[0].url.path == "/v1/customers/list"
+    client.close()
+
+
+def test_affiliates_iter_all() -> None:
+    pages = [[{"id": "aff_1"}]]
+    requests, client = make_paginated_client(pages)
+    list(client.affiliates.iter_all())
+    assert requests[0].url.path == "/v1/affiliates"
+    client.close()

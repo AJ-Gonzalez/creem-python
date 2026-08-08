@@ -244,3 +244,80 @@ def test_error_propagates_through_resource_methods() -> None:
         client.products.get("prod_missing")
     assert excinfo.value.status == 404  # type: ignore[attr-defined]
     client.close()
+
+
+def test_products_update_path() -> None:
+    requests, client = capture()
+    client.products.update("prod_1", {"name": "Renamed"})
+    assert requests[0].method == "PATCH"
+    assert requests[0].url.path == "/v1/products/prod_1"
+    assert json.loads(requests[0].content)["name"] == "Renamed"
+    client.close()
+
+
+def test_transactions_get_param() -> None:
+    requests, client = capture()
+    client.transactions.get("tran_9")
+    assert requests[0].url.path == "/v1/transactions"
+    assert requests[0].url.params["transaction_id"] == "tran_9"
+    client.close()
+
+
+def test_subscriptions_get_and_update() -> None:
+    requests, client = capture()
+    client.subscriptions.get("sub_1")
+    assert requests[0].url.params["subscription_id"] == "sub_1"
+
+    client.subscriptions.update("sub_1", {"items": [{"id": "sitem_1", "units": 3}]})
+    assert requests[1].url.path == "/v1/subscriptions/sub_1"
+    assert json.loads(requests[1].content)["items"][0]["units"] == 3
+    client.close()
+
+
+def test_discounts_create_body() -> None:
+    requests, client = capture()
+    client.discounts.create(
+        {"name": "Sale", "type": "percentage", "percentage": 15, "duration": "once", "applies_to_products": []}
+    )
+    assert requests[0].url.path == "/v1/discounts"
+    assert json.loads(requests[0].content)["percentage"] == 15
+    client.close()
+
+
+def test_customers_list_and_billing() -> None:
+    requests, client = capture()
+    client.customers.list(page_number=2, page_size=25)
+    assert requests[0].url.path == "/v1/customers/list"
+    assert requests[0].url.params["page_number"] == "2"
+    assert requests[0].url.params["page_size"] == "25"
+
+    client.customers.billing({"customer_id": "cust_1"})
+    assert requests[1].url.path == "/v1/customers/billing"
+    assert json.loads(requests[1].content)["customer_id"] == "cust_1"
+    client.close()
+
+
+def test_affiliates_get() -> None:
+    requests, client = capture()
+    client.affiliates.get("aff_1")
+    assert requests[0].url.path == "/v1/affiliates/aff_1"
+    client.close()
+
+
+def test_credits_account_lifecycle_paths() -> None:
+    requests, client = capture()
+    client.credits.create_account({"customer_id": "cust_1", "name": "points", "unit_label": "points"})
+    client.credits.get_account("cca_1")
+    client.credits.freeze("cca_1")
+    client.credits.unfreeze("cca_1")
+    client.credits.close("cca_1")
+    paths = [r.url.path for r in requests]
+    assert paths == [
+        "/v1/customer-credits/accounts",
+        "/v1/customer-credits/accounts/cca_1",
+        "/v1/customer-credits/accounts/cca_1/freeze",
+        "/v1/customer-credits/accounts/cca_1/unfreeze",
+        "/v1/customer-credits/accounts/cca_1/close",
+    ]
+    assert json.loads(requests[0].content)["customer_id"] == "cust_1"
+    client.close()

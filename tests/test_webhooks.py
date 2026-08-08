@@ -227,3 +227,9 @@ def test_end_to_end_checkout_completed() -> None:
     handler.on("checkout.completed", grant_access)
     handler.handle(raw, sign(raw))
     assert granted == {"userId": "user_123", "orderStatus": "paid"}
+
+
+def test_handle_headers_without_signature_raises() -> None:
+    handler = WebhookHandler(SECRET)
+    with pytest.raises(WebhookSignatureError, match="Missing"):
+        handler.handle(BODY, headers={"Content-Type": "application/json"})
