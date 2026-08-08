@@ -144,7 +144,8 @@ Experimental API. `create_account` (optionally with `initial_balance`), `credit`
 - Discount **creation** may be feature-gated on a store: the API returns 403 with error category "Bad Request" and no message. Search and reads work.
 - The customer-credits and moderation APIs are tagged experimental in the official spec and may change.
 - `subscriptions.search` accepts a `status` filter used by the API's documentation, though the OpenAPI spec omits it.
-- The SDK is sync-only for REST. Async webhook callbacks use `ahandle`.
+- The sync client is the default; async backends use `AsyncCreem` (see the
+  Async Client section). Webhook callbacks can be sync or async.
 
 ## Development
 
@@ -159,7 +160,12 @@ pylint src tests scripts examples
 python scripts/generate_models.py  # regenerate models.py from the spec
 ```
 
-Live tests create and clean up their own resources in the sandbox. Some endpoints cannot be live-tested without a completed payment (subscription lifecycle, refunds, licenses); they are mock-tested only.
+Live tests create and clean up their own resources in the sandbox. The
+browser-driven lifecycle tests (`tests/test_live_lifecycle.py`) complete a
+real hosted checkout with the test card (Playwright, in the dev extras),
+covering the subscription lifecycle and the refund flow against the real
+API. License flows still need a license-featured product, which the API
+cannot create; they are mock-tested only.
 
 CI runs the live suite on every push to `main` (and on tags) when the
 `CREEM_API_KEY` repository secret is set — the same test key from the

@@ -41,6 +41,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - Async client (AsyncCreem): full parity with the sync client, async
   pagination iterators, async context manager. See DESIGN.md.
+- Top-level model re-exports (Checkout, Product, Subscription, ...).
+- Browser-completed checkout automation: live tests now cover the full
+  subscription lifecycle (pause, resume, scheduled and immediate cancel)
+  and the refund flow against the real sandbox.
 
 ### Changed
 

@@ -27,6 +27,8 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: pip install -e ".[dev]"
+      - name: Install chromium for checkout automation
+        run: playwright install --with-deps chromium
       - name: Prepare sandbox key
         id: key
         env:

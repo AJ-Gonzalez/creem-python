@@ -33,6 +33,7 @@ dev = [
     "flake8>=7",
     "fastapi>=0.115",
     "uvicorn>=0.30",
+    "playwright>=1.45",
     "build>=1.2",
 ]
 
