@@ -42,7 +42,18 @@ checkout = creem.checkouts.create({
 print(checkout["checkout_url"])  # redirect the customer here
 ```
 
-**Know when it's paid.** Handle the `checkout.completed` (one-time) and `subscription.paid` (recurring) webhooks to grant access — the payloads carry your `metadata` back.
+**Know when it's paid.** Handle the `checkout.completed` (one-time) and `subscription.paid` (recurring) webhooks to grant access — the payloads carry your `metadata` back. Signatures are verified for you:
+
+```python
+from creem import WebhookHandler
+
+handler = WebhookHandler(secret="your webhook secret")
+handler.on("subscription.paid", grant_access)
+handler.on("subscription.canceled", revoke_access)
+
+# FastAPI: handler.handle(await request.body(), request.headers.get("creem-signature"))
+# Async callbacks: await handler.ahandle(...)
+```
 
 **Keep customers happy.** Cancel at period end, not instantly:
 

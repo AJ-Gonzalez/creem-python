@@ -134,13 +134,13 @@ class CreditsBalance(TypedDict):
 
 class SubscriptionCancelParams(TypedDict):
     mode: NotRequired[SubscriptionCancelParamsMode]  # The mode of cancellation (immediate or scheduled), default can be configured in the store billing settings.
-    onExecute: NotRequired[SubscriptionCancelParamsOnexecute]  # The action to execute when canceling (cancel or pause) when mode is scheduled, ignored when mode is immediate or not provided
+    onExecute: NotRequired[SubscriptionCancelParamsOnExecute]  # The action to execute when canceling (cancel or pause) when mode is scheduled, ignored when mode is immediate or not provided
 
 # The mode of cancellation (immediate or scheduled), default can be configured in the store billing settings.
 SubscriptionCancelParamsMode = Literal['immediate', 'scheduled']
 
 # The action to execute when canceling (cancel or pause) when mode is scheduled, ignored when mode is immediate or not provided
-SubscriptionCancelParamsOnexecute = Literal['cancel', 'pause']
+SubscriptionCancelParamsOnExecute = Literal['cancel', 'pause']
 
 class CustomFieldCheckbox(TypedDict):
     label: NotRequired[str]  # The markdown text to display for the checkbox.
@@ -692,53 +692,53 @@ class LicenseValidateParams(TypedDict):
     key: Required[str]  # The license key to validate.
     instance_id: Required[str]  # Id of the instance to validate.
 
-class WebhookCheckoutCompletedEvent(TypedDict):
+class CheckoutCompletedEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookCheckoutCompletedEventEventtype]  # The event name.
+    eventType: NotRequired[CheckoutCompletedEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[Checkout]  # Object related to the event.
 
 # The event name.
-WebhookCheckoutCompletedEventEventtype = Literal['checkout.completed']
+CheckoutCompletedEventEventType = Literal['checkout.completed']
 
-class WebhookDisputeCreatedEvent(TypedDict):
+class DisputeCreatedEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookDisputeCreatedEventEventtype]  # The event name.
+    eventType: NotRequired[DisputeCreatedEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[Dispute]  # Object related to the event.
 
 # The event name.
-WebhookDisputeCreatedEventEventtype = Literal['dispute.created']
+DisputeCreatedEventEventType = Literal['dispute.created']
 
 class WebhookEvent(TypedDict):
     ...
 
-class WebhookRefundCreatedEvent(TypedDict):
+class RefundCreatedEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookRefundCreatedEventEventtype]  # The event name.
+    eventType: NotRequired[RefundCreatedEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[Refund]  # Object related to the event.
 
 # The event name.
-WebhookRefundCreatedEventEventtype = Literal['refund.created']
+RefundCreatedEventEventType = Literal['refund.created']
 
-class WebhookSubscriptionActiveEvent(TypedDict):
+class SubscriptionActiveEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookSubscriptionActiveEventEventtype]  # The event name.
+    eventType: NotRequired[SubscriptionActiveEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[WebhookSubscription]  # Object related to the event.
 
 # The event name.
-WebhookSubscriptionActiveEventEventtype = Literal['subscription.active']
+SubscriptionActiveEventEventType = Literal['subscription.active']
 
-class WebhookSubscriptionCanceledEvent(TypedDict):
+class SubscriptionCanceledEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookSubscriptionCanceledEventEventtype]  # The event name.
+    eventType: NotRequired[SubscriptionCanceledEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[WebhookSubscription]  # Object related to the event.
 
 # The event name.
-WebhookSubscriptionCanceledEventEventtype = Literal['subscription.canceled']
+SubscriptionCanceledEventEventType = Literal['subscription.canceled']
 
 class WebhookSubscription(TypedDict):
     id: NotRequired[str]  # Unique identifier for the object.
@@ -775,75 +775,75 @@ WebhookSubscriptionDiscountType = Literal['percentage', 'fixed']
 
 WebhookSubscriptionDiscountDuration = Literal['forever', 'once', 'repeating']
 
-class WebhookSubscriptionExpiredEvent(TypedDict):
+class SubscriptionExpiredEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookSubscriptionExpiredEventEventtype]  # The event name.
+    eventType: NotRequired[SubscriptionExpiredEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[WebhookSubscription]  # Object related to the event.
 
 # The event name.
-WebhookSubscriptionExpiredEventEventtype = Literal['subscription.expired']
+SubscriptionExpiredEventEventType = Literal['subscription.expired']
 
 class WebhookSubscriptionPaidEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookSubscriptionPaidEventEventtype]  # The event name.
+    eventType: NotRequired[WebhookSubscriptionPaidEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[WebhookSubscription]  # Object related to the event.
 
 # The event name.
-WebhookSubscriptionPaidEventEventtype = Literal['subscription.paid']
+WebhookSubscriptionPaidEventEventType = Literal['subscription.paid']
 
-class WebhookSubscriptionPastDueEvent(TypedDict):
+class SubscriptionPastDueEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookSubscriptionPastDueEventEventtype]  # The event name.
+    eventType: NotRequired[SubscriptionPastDueEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[WebhookSubscription]  # Object related to the event.
 
 # The event name.
-WebhookSubscriptionPastDueEventEventtype = Literal['subscription.past_due']
+SubscriptionPastDueEventEventType = Literal['subscription.past_due']
 
-class WebhookSubscriptionPausedEvent(TypedDict):
+class SubscriptionPausedEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookSubscriptionPausedEventEventtype]  # The event name.
+    eventType: NotRequired[SubscriptionPausedEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[WebhookSubscription]  # Object related to the event.
 
 # The event name.
-WebhookSubscriptionPausedEventEventtype = Literal['subscription.paused']
+SubscriptionPausedEventEventType = Literal['subscription.paused']
 
-class WebhookSubscriptionScheduledCancelEvent(TypedDict):
+class SubscriptionScheduledCancelEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookSubscriptionScheduledCancelEventEventtype]  # The event name.
+    eventType: NotRequired[SubscriptionScheduledCancelEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[WebhookSubscription]  # Object related to the event.
 
 # The event name.
-WebhookSubscriptionScheduledCancelEventEventtype = Literal['subscription.scheduled_cancel']
+SubscriptionScheduledCancelEventEventType = Literal['subscription.scheduled_cancel']
 
-class WebhookSubscriptionTrialingEvent(TypedDict):
+class SubscriptionTrialingEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookSubscriptionTrialingEventEventtype]  # The event name.
+    eventType: NotRequired[SubscriptionTrialingEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[WebhookSubscription]  # Object related to the event.
 
 # The event name.
-WebhookSubscriptionTrialingEventEventtype = Literal['subscription.trialing']
+SubscriptionTrialingEventEventType = Literal['subscription.trialing']
 
-class WebhookSubscriptionUnpaidEvent(TypedDict):
+class SubscriptionUnpaidEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookSubscriptionUnpaidEventEventtype]  # The event name.
+    eventType: NotRequired[SubscriptionUnpaidEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[WebhookSubscription]  # Object related to the event.
 
 # The event name.
-WebhookSubscriptionUnpaidEventEventtype = Literal['subscription.unpaid']
+SubscriptionUnpaidEventEventType = Literal['subscription.unpaid']
 
-class WebhookSubscriptionUpdateEvent(TypedDict):
+class SubscriptionUpdateEvent(TypedDict):
     id: NotRequired[str]  # Unique identifier for the event.
-    eventType: NotRequired[WebhookSubscriptionUpdateEventEventtype]  # The event name.
+    eventType: NotRequired[SubscriptionUpdateEventEventType]  # The event name.
     created_at: NotRequired[int]  # Creation date of the event.
     object: NotRequired[WebhookSubscription]  # Object related to the event.
 
 # The event name.
-WebhookSubscriptionUpdateEventEventtype = Literal['subscription.update']
+SubscriptionUpdateEventEventType = Literal['subscription.update']
 

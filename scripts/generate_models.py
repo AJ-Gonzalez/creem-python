@@ -36,6 +36,18 @@ NAME_OVERRIDES = {
     "ScreenPromptRequest": "ModerationScreenParams",
     "WebhookEventEntity": "WebhookEvent",
     "WebhookSubscriptionEntity": "WebhookSubscription",
+    "WebhookCheckoutCompletedEventEntity": "CheckoutCompletedEvent",
+    "WebhookSubscriptionActiveEventEntity": "SubscriptionActiveEvent",
+    "WebhookSubscriptionCanceledEventEntity": "SubscriptionCanceledEvent",
+    "WebhookSubscriptionScheduledCancelEventEntity": "SubscriptionScheduledCancelEvent",
+    "WebhookSubscriptionPastDueEventEntity": "SubscriptionPastDueEvent",
+    "WebhookSubscriptionUnpaidEventEntity": "SubscriptionUnpaidEvent",
+    "WebhookSubscriptionExpiredEventEntity": "SubscriptionExpiredEvent",
+    "WebhookSubscriptionTrialingEventEntity": "SubscriptionTrialingEvent",
+    "WebhookSubscriptionPausedEventEntity": "SubscriptionPausedEvent",
+    "WebhookSubscriptionUpdateEventEntity": "SubscriptionUpdateEvent",
+    "WebhookRefundCreatedEventEntity": "RefundCreatedEvent",
+    "WebhookDisputeCreatedEventEntity": "DisputeCreatedEvent",
     "StatsSummaryEntity": "StatsSummary",
     "StatsMetricTotalsEntity": "StatsTotals",
     "StatsMetricPeriodEntity": "StatsPeriod",
@@ -107,7 +119,7 @@ def derive_name(spec_name: str) -> str:
 
 
 def camel(field: str) -> str:
-    return "".join(p.capitalize() for p in field.split("_"))
+    return "".join(p[:1].upper() + p[1:] for p in field.split("_"))
 
 
 class Generator:
