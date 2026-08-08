@@ -1,0 +1,5 @@
+[flake8]
+max-line-length = 100
+extend-ignore = E203, W503
+exclude = src/creem/models.py, dist, build, .venv, .git
+per-file-ignores = scripts/generate_models.py:E501,E741

@@ -157,6 +157,7 @@ def test_iter_all_transactions_terminates(client: Creem) -> None:
     transactions = list(client.transactions.iter_all())
     assert all("id" in t for t in transactions)
 
+
 @requires_key
 def test_moderation_screen(client: Creem) -> None:
     result = client.moderation.screen({"prompt": "a cute robot painting flowers"})

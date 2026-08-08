@@ -109,13 +109,16 @@ def test_handle_skips_unregistered_events() -> None:
     called: list[str] = []
     handler.on("subscription.canceled", lambda event: called.append(event.event_type))
     handler.handle(BODY, sign(BODY))
-    assert called == []
+    assert not called
 
 
 def test_on_accepts_list_of_event_types() -> None:
     handler = WebhookHandler(SECRET)
     called: list[str] = []
-    handler.on(["subscription.paid", "subscription.active"], lambda event: called.append(event.event_type))
+    handler.on(
+        ["subscription.paid", "subscription.active"],
+        lambda event: called.append(event.event_type),
+    )
     handler.handle(BODY, sign(BODY))
     assert called == ["subscription.paid"]
 
@@ -135,7 +138,7 @@ def test_handle_rejects_bad_signature_before_dispatch() -> None:
     handler.on("subscription.paid", lambda event: called.append("called"))
     with pytest.raises(WebhookSignatureError):
         handler.handle(BODY, sign(BODY, "wrong"))
-    assert called == []
+    assert not called
 
 
 def test_handle_requires_signature() -> None:
@@ -148,7 +151,10 @@ def test_handle_reads_signature_from_headers_case_insensitively() -> None:
     handler = WebhookHandler(SECRET)
     received: list[WebhookEvent] = []
     handler.on("subscription.paid", received.append)
-    handler.handle(BODY, headers={"Content-Type": "application/json", "Creem-Signature": sign(BODY)})
+    handler.handle(
+        BODY,
+        headers={"Content-Type": "application/json", "Creem-Signature": sign(BODY)},
+    )
     assert len(received) == 1
 
 

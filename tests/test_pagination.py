@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any
 
 import httpx
-import pytest
 
 from creem import Creem
 
@@ -78,7 +77,7 @@ def test_iter_all_stops_after_total_pages() -> None:
 
 def test_iter_all_empty_result_makes_one_request() -> None:
     requests, client = make_paginated_client([], total_pages=0)
-    assert list(client.transactions.iter_all()) == []
+    assert not list(client.transactions.iter_all())
     assert len(requests) == 1
     client.close()
 

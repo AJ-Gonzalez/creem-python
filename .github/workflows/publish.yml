@@ -1,7 +1,8 @@
 # Publish the creem SDK.
 #
 # A version tag (v0.1.0, ...) or a manual workflow_dispatch run:
-#   quality          - mypy, pytest, build sdist + wheel
+#   quality          - lint (flake8, pylint), type check (mypy), pytest,
+#                      build sdist + wheel; runs on Python 3.11 and 3.13
 #   publish-testpypi - upload to Test PyPI (test.pypi.org)
 #   publish-pypi     - upload to PyPI (pypi.org)
 #
@@ -26,14 +27,21 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: ${{ matrix.python-version }}
           cache: pip
       - name: Install dependencies
         run: pip install -e ".[dev]"
+      - name: Lint (flake8)
+        run: flake8 src tests scripts
+      - name: Lint (pylint)
+        run: pylint src tests scripts
       - name: Type check
         run: mypy
       - name: Run tests
@@ -44,7 +52,7 @@ jobs:
           python -m build --outdir dist
       - uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: dist-${{ matrix.python-version }}
           path: dist
 
   publish-testpypi:
@@ -56,7 +64,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: dist-3.13
           path: dist
       - name: Publish to Test PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -72,7 +80,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: dist-3.13
           path: dist
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

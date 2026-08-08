@@ -3,15 +3,14 @@
 All requests are served by an httpx.MockTransport; nothing hits the network.
 """
 
-from creem import Creem
-from creem.models import CreditDebitParams
 import json
-from typing import Any, Callable
+from typing import Callable
 
 import httpx
 import pytest
 
 from creem import Creem
+from creem.models import CreditDebitParams
 
 
 def make_client(handler: Callable[[httpx.Request], httpx.Response]) -> Creem:
@@ -33,7 +32,13 @@ def capture() -> tuple[list[httpx.Request], Creem]:
 def test_products_create_sends_body_and_idempotency_header() -> None:
     requests, client = capture()
     client.products.create(
-        {"name": "Pro", "description": "Pro plan", "price": 1999, "currency": "USD", "billing_type": "recurring"},
+        {
+            "name": "Pro",
+            "description": "Pro plan",
+            "price": 1999,
+            "currency": "USD",
+            "billing_type": "recurring",
+        },
         billing_period="every-month",
         idempotency_key="idem-1",
     )
@@ -168,7 +173,11 @@ def test_stats_summary_maps_snake_case_to_camel_case() -> None:
 
 def test_credits_credit_debit_paths_and_body() -> None:
     requests, client = capture()
-    payload: CreditDebitParams = {"amount": "100", "reference": "signup_bonus", "idempotency_key": "idem_1"}
+    payload: CreditDebitParams = {
+        "amount": "100",
+        "reference": "signup_bonus",
+        "idempotency_key": "idem_1",
+    }
     client.credits.credit("cca_1", payload)
     client.credits.debit("cca_1", payload)
     client.credits.reverse("cca_1", {"transaction_id": "tran_9"})
@@ -277,7 +286,13 @@ def test_subscriptions_get_and_update() -> None:
 def test_discounts_create_body() -> None:
     requests, client = capture()
     client.discounts.create(
-        {"name": "Sale", "type": "percentage", "percentage": 15, "duration": "once", "applies_to_products": []}
+        {
+            "name": "Sale",
+            "type": "percentage",
+            "percentage": 15,
+            "duration": "once",
+            "applies_to_products": [],
+        }
     )
     assert requests[0].url.path == "/v1/discounts"
     assert json.loads(requests[0].content)["percentage"] == 15
@@ -306,7 +321,9 @@ def test_affiliates_get() -> None:
 
 def test_credits_account_lifecycle_paths() -> None:
     requests, client = capture()
-    client.credits.create_account({"customer_id": "cust_1", "name": "points", "unit_label": "points"})
+    client.credits.create_account(
+        {"customer_id": "cust_1", "name": "points", "unit_label": "points"}
+    )
     client.credits.get_account("cca_1")
     client.credits.freeze("cca_1")
     client.credits.unfreeze("cca_1")

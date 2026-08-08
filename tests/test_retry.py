@@ -101,7 +101,7 @@ def test_4xx_is_never_retried(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(Exception):
         client.request("GET", "/v1/products")
     assert attempts == 1
-    assert sleeps == []
+    assert not sleeps
     client.close()
 
 
@@ -118,7 +118,7 @@ def test_post_without_idempotency_is_not_retried(monkeypatch: pytest.MonkeyPatch
     with pytest.raises(CreemServerError):
         client.request("POST", "/v1/checkouts", json_body={"product_id": "prod_1"})
     assert attempts == 1
-    assert sleeps == []
+    assert not sleeps
     client.close()
 
 
@@ -224,7 +224,7 @@ def test_transport_error_not_retried_for_plain_post(monkeypatch: pytest.MonkeyPa
     with pytest.raises(httpx.ConnectError):
         client.request("POST", "/v1/checkouts", json_body={"product_id": "p"})
     assert attempts == 1
-    assert sleeps == []
+    assert not sleeps
     client.close()
 
 
@@ -241,7 +241,7 @@ def test_max_retries_zero_disables_retrying(monkeypatch: pytest.MonkeyPatch) -> 
     with pytest.raises(CreemServerError):
         client.request("GET", "/v1/products")
     assert attempts == 1
-    assert sleeps == []
+    assert not sleeps
     client.close()
 
 
@@ -278,7 +278,11 @@ def test_http_date_retry_after_falls_back_to_backoff(monkeypatch: pytest.MonkeyP
         nonlocal attempts
         attempts += 1
         if attempts == 1:
-            return httpx.Response(429, headers={"Retry-After": "Wed, 21 Oct 2026 07:28:00 GMT"}, json={})
+            return httpx.Response(
+                429,
+                headers={"Retry-After": "Wed, 21 Oct 2026 07:28:00 GMT"},
+                json={},
+            )
         return httpx.Response(200, json={})
 
     client = make_client(handler)

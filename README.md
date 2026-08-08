@@ -65,6 +65,22 @@ Every response is a typed dict with full field hints. When the API complains, yo
 
 Retries are automatic: rate limits (429), server errors, and network failures are retried up to 3 times with exponential backoff and jitter — when it's safe to do so (GETs and requests carrying `request_id`, `idempotency_key`, or an `Idempotency-Key` header). Pass `max_retries=0` to `Creem(...)` to disable.
 
+## Examples
+
+Runnable scripts live in [`examples/`](examples/) — set `CREEM_API_KEY` (test keys target the sandbox) and run them directly:
+
+| Example | What it shows |
+|---|---|
+| `checkout_flow.py` | Create a product, create a checkout, print the payment URL |
+| `subscription_management.py` | Search, scheduled cancel, pause, resume |
+| `webhook_server.py` | FastAPI endpoint with signature verification and grant/revoke dispatch |
+| `customer_credits.py` | Wallet: create account, credit, balance |
+| `browse_and_paginate.py` | Pagination iterators over products and transactions |
+
+```bash
+CREEM_API_KEY=creem_test_... python examples/checkout_flow.py
+```
+
 ## API Reference
 
 See the full reference in [API_REFERENCE](API_REFERENCE.md)

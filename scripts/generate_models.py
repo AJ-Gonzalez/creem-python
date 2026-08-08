@@ -7,10 +7,10 @@ Usage:
 
 The output file is checked in. Regenerate when the upstream spec changes.
 """
+# pylint: disable=line-too-long,too-many-return-statements,too-many-branches
 from __future__ import annotations
 
 import json
-import re
 import sys
 import urllib.request
 from pathlib import Path
@@ -123,6 +123,7 @@ def camel(field: str) -> str:
 
 
 class Generator:
+    """Renders TypedDict models from the OpenAPI spec components."""
     def __init__(self, spec: dict) -> None:
         self.spec = spec
         self.schemas = spec["components"]["schemas"]
@@ -188,7 +189,6 @@ class Generator:
         if "anyOf" in sch:
             return self.type_of({"oneOf": sch["anyOf"]}, parent, field)
         return "Any"
-
 
     def render(self) -> str:
         parts: list[str] = []
@@ -298,7 +298,7 @@ class Generator:
 def main() -> None:
     if len(sys.argv) > 1:
         spec_path = Path(sys.argv[1])
-        spec = json.loads(spec_path.read_text())
+        spec = json.loads(spec_path.read_text(encoding="utf-8"))
     else:
         with urllib.request.urlopen(SPEC_URL, timeout=60) as resp:
             spec = json.loads(resp.read())

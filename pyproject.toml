@@ -29,6 +29,10 @@ dependencies = ["httpx>=0.27"]
 dev = [
     "pytest>=8",
     "mypy>=1.10",
+    "pylint>=3.2",
+    "flake8>=7",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
     "build>=1.2",
 ]
 
@@ -51,4 +55,36 @@ markers = [
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src", "tests"]
+files = ["src", "tests", "examples"]
+
+[tool.flake8]
+max-line-length = 100
+extend-ignore = ["E203", "W503"]
+
+[tool.pylint.main]
+ignore = ["models.py"]
+max-args = 8
+max-line-length = 100
+too-many-instance-attributes = 0
+too-many-locals = 0
+
+[tool.pylint."messages control"]
+disable = [
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "too-few-public-methods",
+    "too-many-instance-attributes",
+    "too-many-locals",
+    "too-many-statements",
+    "duplicate-code",
+    "redefined-builtin",
+    "redefined-outer-name",
+    "fixme",
+    "import-outside-toplevel",
+    "wrong-import-position",
+    "unused-argument",
+    "invalid-name",
+    "broad-exception-caught",
+    "missing-timeout",
+    "too-many-positional-arguments",
+]

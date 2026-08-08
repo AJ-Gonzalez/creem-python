@@ -23,8 +23,6 @@ import time
 from types import TracebackType
 from typing import Any, Mapping, TypeVar, cast
 
-T = TypeVar("T")
-
 import httpx
 
 from .errors import (
@@ -36,6 +34,8 @@ from .errors import (
     CreemServerError,
     CreemValidationError,
 )
+
+T = TypeVar("T")
 
 PROD_BASE_URL = "https://api.creem.io"
 TEST_BASE_URL = "https://test-api.creem.io"
@@ -78,11 +78,14 @@ class Creem:
         api_key_value = api_key or os.environ.get("CREEM_API_KEY")
         if not api_key_value:
             raise CreemConfigurationError(
-                "No API key provided: pass api_key=... or set the CREEM_API_KEY environment variable."
+                "No API key provided: pass api_key=... or set the CREEM_API_KEY "
+                "environment variable."
             )
         self.api_key: str = api_key_value
         if base_url is None:
-            base_url = TEST_BASE_URL if self.api_key.startswith(TEST_KEY_PREFIX) else PROD_BASE_URL
+            base_url = (
+                TEST_BASE_URL if self.api_key.startswith(TEST_KEY_PREFIX) else PROD_BASE_URL
+            )
         self.base_url = base_url.rstrip("/")
         self.max_retries = max_retries
         self.backoff_base = backoff_base

@@ -129,8 +129,9 @@ def test_validation_error_parses_envelope() -> None:
 def test_auth_error_401_and_403() -> None:
     for status in (401, 403):
         def handler(request: httpx.Request, status: int = status) -> httpx.Response:
-            return httpx.Response(status, json={"trace_id": "t", "status": status, "error": "Forbidden"})
-
+            return httpx.Response(
+                status, json={"trace_id": "t", "status": status, "error": "Forbidden"}
+            )
         client = make_client(handler)
         with pytest.raises(CreemAuthError) as excinfo:
             client.request("GET", "/v1/products")
@@ -204,6 +205,8 @@ def test_context_manager_closes_client() -> None:
     closed = False
 
     class TrackingClient(httpx.Client):
+        """httpx client that records close() calls."""
+
         def close(self) -> None:
             nonlocal closed
             closed = True
