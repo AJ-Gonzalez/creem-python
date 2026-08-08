@@ -87,4 +87,4 @@ See the full reference in [API_REFERENCE](API_REFERENCE.md)
 
 ## Documentation for Agents
 
-Coming soon: a dedicated guide that explains the SDK for AI agents and automation workflows. Until then, agents should read [API_REFERENCE.md](API_REFERENCE.md) — it covers every endpoint, webhook, and error.
+AI agents integrating or extending this SDK should read [docs/for-agents.md](docs/for-agents.md) — it covers the mental model, conventions, integration flows, and gotchas. For the complete API contract, see [API_REFERENCE.md](API_REFERENCE.md).
