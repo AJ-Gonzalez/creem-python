@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "creem"
-version = "0.1.1"
+version = "0.2.0"
 description = "Python SDK for the Creem.io REST API"
 readme = "README.md"
 requires-python = ">=3.11"
