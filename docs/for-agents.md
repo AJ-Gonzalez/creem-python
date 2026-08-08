@@ -171,6 +171,25 @@ CI runs the live suite on every push to `main` (and on tags) when the
 `CREEM_API_KEY` repository secret is set — the same test key from the
 gitignored `.env` file, stored as a GitHub secret.
 
+## Production Smoke Test
+
+`scripts/prod_smoke.py` exercises the SDK against the live API. It is
+read-only except for create-then-archive round trips (a product and, when
+enabled, a discount) — no checkouts, refunds, subscriptions, or credits
+mutations.
+
+Safety gates: requires `CREEM_PROD_SMOKE=1` and a live key (`creem_`
+prefix). The key comes from `CREEM_API_KEY` or the gitignored `prodkey`
+file. Never run the pytest live suite with a production key — it creates
+real products and customers.
+
+```bash
+CREEM_PROD_SMOKE=1 CREEM_API_KEY=$(cat prodkey) python scripts/prod_smoke.py
+```
+
+Note: if the shell exports a test key (e.g. after sourcing `.env`), the
+script refuses to run — unset `CREEM_API_KEY` first.
+
 ## Rules for Agents Editing This SDK
 
 - Read `AGENTS.md` first; its guidelines apply (type hints mandatory, read before edit, STE-flat docs).

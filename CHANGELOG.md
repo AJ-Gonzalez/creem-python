@@ -51,5 +51,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Production smoke test (scripts/prod_smoke.py): read-only checks plus
+  create-then-archive round trips against the live API, gated by
+  CREEM_PROD_SMOKE=1 and a live key.
+- Top-level model re-exports (Checkout, Product, Subscription, ...).
+- Browser-completed checkout automation: live tests cover the full
+  subscription lifecycle and the refund flow against the real sandbox.
 
 ### Changed
