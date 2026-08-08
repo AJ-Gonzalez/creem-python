@@ -36,10 +36,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Both dict-params and keyword-only call styles on all body methods.
 - pylint now covers examples/ (CI and local).
 
-## [Unreleased]
+## [0.3.0] - 2026-08-08
 
 ### Added
 - Async client (AsyncCreem): full parity with the sync client, async
   pagination iterators, async context manager. See DESIGN.md.
+
+### Changed
+
+## [Unreleased]
+
+### Added
 
 ### Changed
