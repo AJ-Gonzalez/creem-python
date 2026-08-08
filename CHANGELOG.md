@@ -24,14 +24,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - GitHub Actions pipeline: quality gate (mypy, pytest, build), Test PyPI and
   PyPI publishing via trusted publishing.
 
-## [Unreleased]
-
-### Added
-
-### Changed
 
 ## [Unreleased]
 
 ### Added
+- Release tooling: scripts/release.sh with --dry-run, changelog, and a CI
+  check that the version tag matches pyproject and __init__ versions.
+- Live test suite runs in CI (workflow gated on the CREEM_API_KEY secret).
 
 ### Changed
+- Both dict-params and keyword-only call styles on all body methods.
+- pylint now covers examples/ (CI and local).
