@@ -6,16 +6,56 @@ Will hopefully be official at some point.
 
 ## Installing
 
-(agent fills this)
+Requires Python 3.11+.
+
+```bash
+pip install creem
+```
+
+For development, install from the repo with test tooling:
+
+```bash
+pip install -e ".[dev]"
+```
 
 ## Quickstart
 
-(Agent fills this, be terse but warm, add the most common examples)
+Grab your API key from the [dashboard](https://creem.io/dashboard/developers), then:
+
+```python
+from creem import Creem
+
+creem = Creem()  # reads CREEM_API_KEY from the environment
+```
+
+Test keys (`creem_test_...`) automatically target the sandbox at `test-api.creem.io` — no config needed. Live keys (`creem_...`) hit production.
+
+**Sell something.** Create a checkout session and send your customer to the hosted payment page:
+
+```python
+checkout = creem.checkouts.create({
+    "product_id": "prod_abc123",
+    "success_url": "https://yourapp.com/success",
+    "metadata": {"userId": "user_123"},  # flows through to webhooks
+})
+
+print(checkout["checkout_url"])  # redirect the customer here
+```
+
+**Know when it's paid.** Handle the `checkout.completed` (one-time) and `subscription.paid` (recurring) webhooks to grant access — the payloads carry your `metadata` back.
+
+**Keep customers happy.** Cancel at period end, not instantly:
+
+```python
+creem.subscriptions.cancel("sub_abc123", {"mode": "scheduled"})
+```
+
+Every response is a typed dict with full field hints. When the API complains, you get a `CreemAPIError` carrying the `trace_id` — include it when contacting support.
 
 ## API Reference
 
-See the full refrerence in [API_REFERENCE](API_REFERENCE.md)
+See the full reference in [API_REFERENCE](API_REFERENCE.md)
 
 ## Documentation for Agents
 
-(This section will link to a document for agents, made to best explain the SDK)
+Coming soon: a dedicated guide that explains the SDK for AI agents and automation workflows. Until then, agents should read [API_REFERENCE.md](API_REFERENCE.md) — it covers every endpoint, webhook, and error.
