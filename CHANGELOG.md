@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+## [0.4.0] - 2026-08-08 — "The Comfy One"
+
+### Added
 - Production smoke test (scripts/prod_smoke.py): read-only checks plus
   create-then-archive round trips against the live API, gated by
   CREEM_PROD_SMOKE=1 and a live key.
