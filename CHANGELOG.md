@@ -23,3 +23,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and idempotency gating.
 - GitHub Actions pipeline: quality gate (mypy, pytest, build), Test PyPI and
   PyPI publishing via trusted publishing.
+
+## [Unreleased]
+
+### Added
+
+### Changed
