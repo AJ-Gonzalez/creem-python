@@ -39,5 +39,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Async client (AsyncCreem): full parity with the sync client, async
+  pagination iterators, async context manager. See DESIGN.md.
 
 ### Changed
