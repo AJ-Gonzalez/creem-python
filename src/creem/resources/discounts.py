@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any, Literal
 
 from ..models import Discount, DiscountCreateParams, DiscountList, DiscountType
-from .base import APIResource, drop_none, merge
+from .base import APIResource, drop_none, iter_pages, merge
 
 DiscountSearchStatus = Literal["active", "deleted"]
 
@@ -69,3 +70,27 @@ class Discounts(APIResource):
     def delete(self, discount_id: str) -> Discount:
         """Permanently delete a discount code; it can no longer be redeemed."""
         return self._client.request("DELETE", f"/v1/discounts/{discount_id}/delete")
+
+    def iter_all(
+        self,
+        *,
+        page_size: int = 100,
+        product_id: str | None = None,
+        status: DiscountSearchStatus | None = None,
+        type: DiscountType | None = None,
+        created_after: str | None = None,
+        created_before: str | None = None,
+    ) -> Iterator[Discount]:
+        """Yield every discount across all pages."""
+        for page in iter_pages(
+            self.search,
+            page_size=page_size,
+            filters={
+                "product_id": product_id,
+                "status": status,
+                "type": type,
+                "created_after": created_after,
+                "created_before": created_before,
+            },
+        ):
+            yield from page["items"]

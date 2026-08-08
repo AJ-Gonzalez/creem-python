@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any
 
 from ..models import (
     License,
     LicenseActivateParams,
     LicenseDeactivateParams,
+    LicenseInstance,
     LicenseInstanceList,
     LicenseValidateParams,
 )
-from .base import APIResource, drop_none, merge
+from .base import APIResource, drop_none, iter_pages, merge
 
 
 class Licenses(APIResource):
@@ -65,3 +67,10 @@ class Licenses(APIResource):
             f"/v1/licenses/{license_id}/instances",
             params=drop_none({"page_number": page_number, "page_size": page_size}),
         )
+
+    def iter_instances(self, license_id: str, *, page_size: int = 100) -> Iterator[LicenseInstance]:
+        """Yield every activation (instance) of a license key."""
+        for page in iter_pages(
+            self.instances, page_size=page_size, filters={"license_id": license_id}
+        ):
+            yield from page["items"]

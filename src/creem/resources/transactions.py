@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 from ..models import Transaction, TransactionList
-from .base import APIResource, drop_none
+from .base import APIResource, drop_none, iter_pages
 
 
 class Transactions(APIResource):
@@ -39,3 +41,23 @@ class Transactions(APIResource):
                 }
             ),
         )
+
+    def iter_all(
+        self,
+        *,
+        page_size: int = 100,
+        customer_id: str | None = None,
+        order_id: str | None = None,
+        product_id: str | None = None,
+    ) -> Iterator[Transaction]:
+        """Yield every transaction (newest first) across all pages."""
+        for page in iter_pages(
+            self.search,
+            page_size=page_size,
+            filters={
+                "customer_id": customer_id,
+                "order_id": order_id,
+                "product_id": product_id,
+            },
+        ):
+            yield from page["items"]

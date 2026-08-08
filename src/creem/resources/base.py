@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Mapping
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any, Callable, Mapping
 
 if TYPE_CHECKING:
     from ..client import Creem
@@ -25,6 +26,61 @@ def drop_none(params: Mapping[str, Any] | None) -> dict[str, Any] | None:
     if params is None:
         return None
     return {key: value for key, value in params.items() if value is not None}
+
+
+def iter_pages(
+    fetch: Callable[..., Any],
+    *,
+    page_size: int,
+    filters: Mapping[str, Any],
+) -> Iterator[Any]:
+    """Yield pages from a page-number-paginated endpoint until the last page.
+
+    ``fetch`` is the resource's single-page method (e.g. ``search``); its
+    ``page_number`` and ``page_size`` parameters are set per page, and
+    ``filters`` carries the remaining query filters.
+    """
+    clean = {
+        key: value
+        for key, value in filters.items()
+        if value is not None and key not in ("page_number", "page_size")
+    }
+    page_number = 1
+    while True:
+        page = fetch(page_number=page_number, page_size=page_size, **clean)
+        yield page
+        pagination = page.get("pagination") or {}
+        total_pages = pagination.get("total_pages")
+        if total_pages is None or page_number >= total_pages:
+            return
+        page_number += 1
+
+
+def iter_cursor_pages(
+    fetch: Callable[..., Any],
+    *,
+    limit: int,
+    filters: Mapping[str, Any],
+    id_key: str,
+) -> Iterator[Any]:
+    """Yield pages from a cursor-paginated endpoint until ``has_more`` stops.
+
+    ``starting_after`` advances to the last item's ``id_key`` value on each
+    page — the API's documented cursor semantics.
+    """
+    clean = {
+        key: value
+        for key, value in filters.items()
+        if value is not None and key not in ("limit", "starting_after", "ending_before")
+    }
+    starting_after: str | None = None
+    while True:
+        page = fetch(limit=limit, starting_after=starting_after, **clean)
+        yield page
+        items = page.get("data") or []
+        if not page.get("has_more") or not items:
+            return
+        starting_after = str(items[-1][id_key])
 
 
 class APIResource:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any
 
 from ..models import (
@@ -12,7 +13,7 @@ from ..models import (
     SubscriptionUpdateParams,
     SubscriptionUpgradeParams,
 )
-from .base import APIResource, drop_none, merge
+from .base import APIResource, drop_none, iter_pages, merge
 
 
 class Subscriptions(APIResource):
@@ -94,3 +95,13 @@ class Subscriptions(APIResource):
             f"/v1/subscriptions/{subscription_id}/upgrade",
             json_body=merge(params, kwargs),
         )
+
+    def iter_all(
+        self,
+        *,
+        page_size: int = 100,
+        status: SubscriptionStatus | None = None,
+    ) -> Iterator[Subscription]:
+        """Yield every subscription across all pages."""
+        for page in iter_pages(self.search, page_size=page_size, filters={"status": status}):
+            yield from page["items"]

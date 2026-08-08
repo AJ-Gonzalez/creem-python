@@ -151,6 +151,13 @@ def test_transactions_and_stats_shapes(client: Creem) -> None:
 
 
 @requires_key
+def test_iter_all_transactions_terminates(client: Creem) -> None:
+    # Validates cursor-less page iteration against the real pagination shape
+    # (total_pages must terminate the loop even with zero records).
+    transactions = list(client.transactions.iter_all())
+    assert all("id" in t for t in transactions)
+
+@requires_key
 def test_moderation_screen(client: Creem) -> None:
     result = client.moderation.screen({"prompt": "a cute robot painting flowers"})
     assert result["decision"] in ("allow", "deny", "flag")

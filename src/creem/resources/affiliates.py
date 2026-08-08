@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 from ..models import (
     Affiliate,
     AffiliateList,
+    Commission,
     CommissionList,
     CommissionStatus,
 )
-from .base import APIResource, drop_none
+from .base import APIResource, drop_none, iter_pages
 
 
 class Affiliates(APIResource):
@@ -49,3 +52,23 @@ class Affiliates(APIResource):
                 {"status": status, "page_number": page_number, "page_size": page_size}
             ),
         )
+
+    def iter_all(self, *, page_size: int = 100) -> Iterator[Affiliate]:
+        """Yield every affiliate across all pages."""
+        for page in iter_pages(self.list, page_size=page_size, filters={}):
+            yield from page["items"]
+
+    def iter_commissions(
+        self,
+        affiliate_id: str,
+        *,
+        page_size: int = 100,
+        status: CommissionStatus | None = None,
+    ) -> Iterator[Commission]:
+        """Yield every commission for an affiliate across all pages."""
+        for page in iter_pages(
+            self.commissions,
+            page_size=page_size,
+            filters={"affiliate_id": affiliate_id, "status": status},
+        ):
+            yield from page["items"]

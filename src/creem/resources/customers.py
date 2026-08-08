@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any
 
 from ..models import (
@@ -11,11 +12,14 @@ from ..models import (
     CustomerCreateParams,
     CustomerList,
     CustomerUpdateParams,
+    License,
     LicenseList,
+    Order,
     OrderList,
+    Subscription,
     SubscriptionList,
 )
-from .base import APIResource, drop_none, merge
+from .base import APIResource, drop_none, iter_pages, merge
 
 
 class Customers(APIResource):
@@ -114,3 +118,31 @@ class Customers(APIResource):
             f"/v1/customers/{customer_id}/licenses",
             params=drop_none({"page_number": page_number, "page_size": page_size}),
         )
+
+    def iter_all(self, *, page_size: int = 100) -> Iterator[Customer]:
+        """Yield every customer across all pages."""
+        for page in iter_pages(self.list, page_size=page_size, filters={}):
+            yield from page["items"]
+
+    def iter_orders(self, customer_id: str, *, page_size: int = 100) -> Iterator[Order]:
+        """Yield every order for a customer across all pages."""
+        for page in iter_pages(
+            self.orders, page_size=page_size, filters={"customer_id": customer_id}
+        ):
+            yield from page["items"]
+
+    def iter_subscriptions(
+        self, customer_id: str, *, page_size: int = 100
+    ) -> Iterator[Subscription]:
+        """Yield every subscription for a customer across all pages."""
+        for page in iter_pages(
+            self.subscriptions, page_size=page_size, filters={"customer_id": customer_id}
+        ):
+            yield from page["items"]
+
+    def iter_licenses(self, customer_id: str, *, page_size: int = 100) -> Iterator[License]:
+        """Yield every license key for a customer across all pages."""
+        for page in iter_pages(
+            self.licenses, page_size=page_size, filters={"customer_id": customer_id}
+        ):
+            yield from page["items"]

@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any
 
 from ..models import Product, ProductCreateParams, ProductList, ProductStatus, ProductUpdateParams
-from .base import APIResource, drop_none, merge
+from .base import APIResource, drop_none, iter_pages, merge
 
 
 class Products(APIResource):
@@ -64,3 +65,13 @@ class Products(APIResource):
         """Archive a product (soft-delete). It can no longer be purchased but
         is retained for historical orders and subscriptions."""
         return self._client.request("DELETE", f"/v1/products/{product_id}")
+
+    def iter_all(
+        self,
+        *,
+        page_size: int = 100,
+        status: ProductStatus | None = None,
+    ) -> Iterator[Product]:
+        """Yield every product across all pages."""
+        for page in iter_pages(self.search, page_size=page_size, filters={"status": status}):
+            yield from page["items"]

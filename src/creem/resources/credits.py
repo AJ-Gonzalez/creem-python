@@ -6,6 +6,7 @@ and may change.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any
 
 from ..models import (
@@ -14,11 +15,12 @@ from ..models import (
     CreditsAccountCreateParams,
     CreditsAccountList,
     CreditsBalance,
+    CreditsEntry,
     CreditsEntryList,
     CreditsReverseParams,
     CreditsTransaction,
 )
-from .base import APIResource, drop_none, merge
+from .base import APIResource, drop_none, iter_cursor_pages, merge
 
 
 class Credits(APIResource):
@@ -144,3 +146,22 @@ class Credits(APIResource):
         return self._client.request(
             "POST", f"/v1/customer-credits/accounts/{account_id}/unfreeze"
         )
+
+    def iter_accounts(
+        self,
+        *,
+        limit: int = 100,
+        customer_id: str | None = None,
+    ) -> Iterator[CreditsAccount]:
+        """Yield every credits account across cursor pages."""
+        for page in iter_cursor_pages(
+            self.list_accounts, limit=limit, filters={"customer_id": customer_id}, id_key="id"
+        ):
+            yield from page["data"]
+
+    def iter_entries(self, account_id: str, *, limit: int = 100) -> Iterator[CreditsEntry]:
+        """Yield every credit/debit entry for an account across cursor pages."""
+        for page in iter_cursor_pages(
+            self.entries, limit=limit, filters={"account_id": account_id}, id_key="id"
+        ):
+            yield from page["data"]
