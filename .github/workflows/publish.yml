@@ -52,7 +52,7 @@ jobs:
       - name: Lint (flake8)
         run: flake8 src tests scripts
       - name: Lint (pylint)
-        run: pylint src tests scripts
+        run: pylint src tests scripts examples
       - name: Type check
         run: mypy
       - name: Run tests
