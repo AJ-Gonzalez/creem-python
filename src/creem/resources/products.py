@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any
+from typing import Any, overload
 
 from ..models import Product, ProductCreateParams, ProductList, ProductStatus, ProductUpdateParams
 from .base import APIResource, drop_none, iter_pages, merge
@@ -12,9 +12,21 @@ from .base import APIResource, drop_none, iter_pages, merge
 class Products(APIResource):
     """Product endpoints."""
 
+    @overload
     def create(
         self,
         params: ProductCreateParams,
+        *,
+        idempotency_key: str | None = None,
+        **kwargs: Any,
+    ) -> Product: ...
+
+    @overload
+    def create(self, *, idempotency_key: str | None = None, **kwargs: Any) -> Product: ...
+
+    def create(
+        self,
+        params: ProductCreateParams | None = None,
         *,
         idempotency_key: str | None = None,
         **kwargs: Any,

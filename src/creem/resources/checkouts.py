@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, overload
 
 from ..models import Checkout, CheckoutCreateParams
 from .base import APIResource, merge
@@ -11,9 +11,15 @@ from .base import APIResource, merge
 class Checkouts(APIResource):
     """Checkout session endpoints."""
 
+    @overload
+    def create(self, params: CheckoutCreateParams, **kwargs: Any) -> Checkout: ...
+
+    @overload
+    def create(self, **kwargs: Any) -> Checkout: ...
+
     def create(
         self,
-        params: CheckoutCreateParams,
+        params: CheckoutCreateParams | None = None,
         **kwargs: Any,
     ) -> Checkout:
         """Create a checkout session.

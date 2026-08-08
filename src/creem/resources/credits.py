@@ -7,7 +7,7 @@ and may change.
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any
+from typing import Any, overload
 
 from ..models import (
     CreditDebitParams,
@@ -26,9 +26,17 @@ from .base import APIResource, drop_none, iter_cursor_pages, merge
 class Credits(APIResource):
     """Customer credits account endpoints."""
 
+    @overload
+    def create_account(
+        self, params: CreditsAccountCreateParams, **kwargs: Any
+    ) -> CreditsAccount: ...
+
+    @overload
+    def create_account(self, **kwargs: Any) -> CreditsAccount: ...
+
     def create_account(
         self,
-        params: CreditsAccountCreateParams,
+        params: CreditsAccountCreateParams | None = None,
         **kwargs: Any,
     ) -> CreditsAccount:
         """Create a credits account for a customer, optionally seeded with an
@@ -73,10 +81,18 @@ class Credits(APIResource):
             params=drop_none({"at": at}),
         )
 
+    @overload
+    def credit(
+        self, account_id: str, params: CreditDebitParams, **kwargs: Any
+    ) -> CreditsTransaction: ...
+
+    @overload
+    def credit(self, account_id: str, **kwargs: Any) -> CreditsTransaction: ...
+
     def credit(
         self,
         account_id: str,
-        params: CreditDebitParams,
+        params: CreditDebitParams | None = None,
         **kwargs: Any,
     ) -> CreditsTransaction:
         """Add credits to an account."""
@@ -86,10 +102,18 @@ class Credits(APIResource):
             json_body=merge(params, kwargs),
         )
 
+    @overload
+    def debit(
+        self, account_id: str, params: CreditDebitParams, **kwargs: Any
+    ) -> CreditsTransaction: ...
+
+    @overload
+    def debit(self, account_id: str, **kwargs: Any) -> CreditsTransaction: ...
+
     def debit(
         self,
         account_id: str,
-        params: CreditDebitParams,
+        params: CreditDebitParams | None = None,
         **kwargs: Any,
     ) -> CreditsTransaction:
         """Deduct credits from an account."""
@@ -99,10 +123,18 @@ class Credits(APIResource):
             json_body=merge(params, kwargs),
         )
 
+    @overload
+    def reverse(
+        self, account_id: str, params: CreditsReverseParams, **kwargs: Any
+    ) -> CreditsTransaction: ...
+
+    @overload
+    def reverse(self, account_id: str, **kwargs: Any) -> CreditsTransaction: ...
+
     def reverse(
         self,
         account_id: str,
-        params: CreditsReverseParams,
+        params: CreditsReverseParams | None = None,
         **kwargs: Any,
     ) -> CreditsTransaction:
         """Reverse a previous credit or debit, preserving full history."""

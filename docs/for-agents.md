@@ -141,6 +141,10 @@ python scripts/generate_models.py  # regenerate models.py from the spec
 
 Live tests create and clean up their own resources in the sandbox. Some endpoints cannot be live-tested without a completed payment (subscription lifecycle, refunds, licenses); they are mock-tested only.
 
+CI runs the live suite on every push to `main` (and on tags) when the
+`CREEM_API_KEY` repository secret is set — the same test key from the
+gitignored `.env` file, stored as a GitHub secret.
+
 ## Rules for Agents Editing This SDK
 
 - Read `AGENTS.md` first; its guidelines apply (type hints mandatory, read before edit, STE-flat docs).

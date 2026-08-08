@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any
+from typing import Any, overload
 
 from ..models import (
     Subscription,
@@ -82,10 +82,18 @@ class Subscriptions(APIResource):
         """Resume a paused (or scheduled-for-cancellation) subscription."""
         return self._client.request("POST", f"/v1/subscriptions/{subscription_id}/resume")
 
+    @overload
+    def upgrade(
+        self, subscription_id: str, params: SubscriptionUpgradeParams, **kwargs: Any
+    ) -> Subscription: ...
+
+    @overload
+    def upgrade(self, subscription_id: str, **kwargs: Any) -> Subscription: ...
+
     def upgrade(
         self,
         subscription_id: str,
-        params: SubscriptionUpgradeParams,
+        params: SubscriptionUpgradeParams | None = None,
         **kwargs: Any,
     ) -> Subscription:
         """Upgrade a subscription to a different product. Proration is

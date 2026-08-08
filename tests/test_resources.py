@@ -53,6 +53,33 @@ def test_products_create_sends_body_and_idempotency_header() -> None:
     client.close()
 
 
+def test_kwargs_only_style_works_for_body_methods() -> None:
+    # Both calling styles must work: dict params and keyword-only.
+    requests, client = capture()
+    client.checkouts.create(product_id="prod_1", success_url="https://x.dev/s")
+    client.customers.create(email="kw@example.com", name="Kwargs User")
+    client.licenses.activate(key="ABC123-XYZ456-XYZ456-XYZ456", instance_name="laptop")
+    client.credits.credit("cca_1", amount="5", reference="ref", idempotency_key="idem")
+    assert json.loads(requests[0].content) == {
+        "product_id": "prod_1",
+        "success_url": "https://x.dev/s",
+    }
+    assert json.loads(requests[1].content)["email"] == "kw@example.com"
+    assert json.loads(requests[2].content)["instance_name"] == "laptop"
+    assert json.loads(requests[3].content)["amount"] == "5"
+    client.close()
+
+
+def test_kwargs_override_params_entries() -> None:
+    requests, client = capture()
+    client.checkouts.create({"product_id": "prod_1", "success_url": "https://old.dev"},
+                            success_url="https://new.dev")
+    body = json.loads(requests[0].content)
+    assert body["product_id"] == "prod_1"
+    assert body["success_url"] == "https://new.dev"
+    client.close()
+
+
 def test_products_get_and_archive_paths() -> None:
     requests, client = capture()
     client.products.get("prod_1")

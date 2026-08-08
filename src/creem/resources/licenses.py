@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any
+from typing import Any, overload
 
 from ..models import (
     License,
@@ -23,9 +23,15 @@ class Licenses(APIResource):
     customer at purchase; instances are per-device activations.
     """
 
+    @overload
+    def activate(self, params: LicenseActivateParams, **kwargs: Any) -> License: ...
+
+    @overload
+    def activate(self, **kwargs: Any) -> License: ...
+
     def activate(
         self,
-        params: LicenseActivateParams,
+        params: LicenseActivateParams | None = None,
         **kwargs: Any,
     ) -> License:
         """Register a new device instance against a license key."""
@@ -33,9 +39,15 @@ class Licenses(APIResource):
             "POST", "/v1/licenses/activate", json_body=merge(params, kwargs)
         )
 
+    @overload
+    def validate(self, params: LicenseValidateParams, **kwargs: Any) -> License: ...
+
+    @overload
+    def validate(self, **kwargs: Any) -> License: ...
+
     def validate(
         self,
-        params: LicenseValidateParams,
+        params: LicenseValidateParams | None = None,
         **kwargs: Any,
     ) -> License:
         """Verify a license key for a specific instance. Grant access only
@@ -44,9 +56,15 @@ class Licenses(APIResource):
             "POST", "/v1/licenses/validate", json_body=merge(params, kwargs)
         )
 
+    @overload
+    def deactivate(self, params: LicenseDeactivateParams, **kwargs: Any) -> License: ...
+
+    @overload
+    def deactivate(self, **kwargs: Any) -> License: ...
+
     def deactivate(
         self,
-        params: LicenseDeactivateParams,
+        params: LicenseDeactivateParams | None = None,
         **kwargs: Any,
     ) -> License:
         """Remove a device activation, freeing up an activation slot."""

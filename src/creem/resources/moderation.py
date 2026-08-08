@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, overload
 
 from ..models import ModerationResult, ModerationScreenParams
 from .base import APIResource, merge
@@ -14,9 +14,15 @@ class Moderation(APIResource):
     Experimental: this endpoint may change.
     """
 
+    @overload
+    def screen(self, params: ModerationScreenParams, **kwargs: Any) -> ModerationResult: ...
+
+    @overload
+    def screen(self, **kwargs: Any) -> ModerationResult: ...
+
     def screen(
         self,
-        params: ModerationScreenParams,
+        params: ModerationScreenParams | None = None,
         **kwargs: Any,
     ) -> ModerationResult:
         """Evaluate a text prompt against content policies before

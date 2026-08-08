@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any
+from typing import Any, overload
 
 from ..models import (
     Customer,
@@ -25,9 +25,15 @@ from .base import APIResource, drop_none, iter_pages, merge
 class Customers(APIResource):
     """Customer endpoints."""
 
+    @overload
+    def create(self, params: CustomerCreateParams, **kwargs: Any) -> Customer: ...
+
+    @overload
+    def create(self, **kwargs: Any) -> Customer: ...
+
     def create(
         self,
-        params: CustomerCreateParams,
+        params: CustomerCreateParams | None = None,
         **kwargs: Any,
     ) -> Customer:
         """Create a new customer record for the store."""
@@ -43,9 +49,15 @@ class Customers(APIResource):
             params=drop_none({"customer_id": customer_id, "email": email}),
         )
 
+    @overload
+    def update(self, params: CustomerUpdateParams, **kwargs: Any) -> Customer: ...
+
+    @overload
+    def update(self, **kwargs: Any) -> Customer: ...
+
     def update(
         self,
-        params: CustomerUpdateParams,
+        params: CustomerUpdateParams | None = None,
         **kwargs: Any,
     ) -> Customer:
         """Update a customer. ``customer_id`` is required."""
@@ -66,9 +78,15 @@ class Customers(APIResource):
             params=drop_none({"page_number": page_number, "page_size": page_size}),
         )
 
+    @overload
+    def billing(self, params: CustomerBillingParams, **kwargs: Any) -> CustomerBillingLinks: ...
+
+    @overload
+    def billing(self, **kwargs: Any) -> CustomerBillingLinks: ...
+
     def billing(
         self,
-        params: CustomerBillingParams,
+        params: CustomerBillingParams | None = None,
         **kwargs: Any,
     ) -> CustomerBillingLinks:
         """Generate a customer portal link for self-service billing

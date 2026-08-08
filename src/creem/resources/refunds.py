@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, overload
 
 from ..models import RefundCreateParams, RefundResult
 from .base import APIResource, merge
@@ -11,9 +11,15 @@ from .base import APIResource, merge
 class Refunds(APIResource):
     """Refund endpoints."""
 
+    @overload
+    def create(self, params: RefundCreateParams, **kwargs: Any) -> RefundResult: ...
+
+    @overload
+    def create(self, **kwargs: Any) -> RefundResult: ...
+
     def create(
         self,
-        params: RefundCreateParams,
+        params: RefundCreateParams | None = None,
         **kwargs: Any,
     ) -> RefundResult:
         """Issue a full refund for a payment, identified by its transaction

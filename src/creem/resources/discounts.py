@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any, Literal
+from typing import Any, Literal, overload
 
 from ..models import Discount, DiscountCreateParams, DiscountList, DiscountType
 from .base import APIResource, drop_none, iter_pages, merge
@@ -14,9 +14,15 @@ DiscountSearchStatus = Literal["active", "deleted"]
 class Discounts(APIResource):
     """Discount code endpoints."""
 
+    @overload
+    def create(self, params: DiscountCreateParams, **kwargs: Any) -> Discount: ...
+
+    @overload
+    def create(self, **kwargs: Any) -> Discount: ...
+
     def create(
         self,
-        params: DiscountCreateParams,
+        params: DiscountCreateParams | None = None,
         **kwargs: Any,
     ) -> Discount:
         """Create a promotional discount code. Percentage or fixed amount,
