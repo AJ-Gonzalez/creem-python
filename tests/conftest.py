@@ -4,9 +4,18 @@ sandbox API key without it ever being committed."""
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
-_ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+_ROOT = Path(__file__).resolve().parent.parent
+
+# The examples package lives at the repo root. The `pytest` console script
+# does not put the working directory on sys.path (unlike `python -m pytest`),
+# so make the root importable explicitly for the examples import tests.
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+_ENV_PATH = _ROOT / ".env"
 
 
 def _load_dotenv() -> None:
