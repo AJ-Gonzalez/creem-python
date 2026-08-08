@@ -63,6 +63,8 @@ creem.subscriptions.cancel("sub_abc123", {"mode": "scheduled"})
 
 Every response is a typed dict with full field hints. When the API complains, you get a `CreemAPIError` carrying the `trace_id` — include it when contacting support.
 
+Retries are automatic: rate limits (429), server errors, and network failures are retried up to 3 times with exponential backoff and jitter — when it's safe to do so (GETs and requests carrying `request_id`, `idempotency_key`, or an `Idempotency-Key` header). Pass `max_retries=0` to `Creem(...)` to disable.
+
 ## API Reference
 
 See the full reference in [API_REFERENCE](API_REFERENCE.md)
