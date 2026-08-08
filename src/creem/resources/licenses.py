@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import AsyncIterator, Iterator
 from typing import Any, overload
 
 from ..models import (
@@ -13,7 +13,7 @@ from ..models import (
     LicenseInstanceList,
     LicenseValidateParams,
 )
-from .base import APIResource, drop_none, iter_pages, merge
+from .base import APIResource, AsyncAPIResource, drop_none, iter_pages, iter_pages_async, merge
 
 
 class Licenses(APIResource):
@@ -92,3 +92,80 @@ class Licenses(APIResource):
             self.instances, page_size=page_size, filters={"license_id": license_id}
         ):
             yield from page["items"]
+
+
+class AsyncLicenses(AsyncAPIResource):
+    """Async license key endpoints."""
+
+    @overload
+    async def activate(self, params: LicenseActivateParams, **kwargs: Any) -> License: ...
+
+    @overload
+    async def activate(self, **kwargs: Any) -> License: ...
+
+    async def activate(
+        self,
+        params: LicenseActivateParams | None = None,
+        **kwargs: Any,
+    ) -> License:
+        """Register a new device instance against a license key."""
+        return await self._client.request(
+            "POST", "/v1/licenses/activate", json_body=merge(params, kwargs)
+        )
+
+    @overload
+    async def validate(self, params: LicenseValidateParams, **kwargs: Any) -> License: ...
+
+    @overload
+    async def validate(self, **kwargs: Any) -> License: ...
+
+    async def validate(
+        self,
+        params: LicenseValidateParams | None = None,
+        **kwargs: Any,
+    ) -> License:
+        """Verify a license key for a specific instance. Grant access only
+        when the returned ``status`` is ``"active"``."""
+        return await self._client.request(
+            "POST", "/v1/licenses/validate", json_body=merge(params, kwargs)
+        )
+
+    @overload
+    async def deactivate(self, params: LicenseDeactivateParams, **kwargs: Any) -> License: ...
+
+    @overload
+    async def deactivate(self, **kwargs: Any) -> License: ...
+
+    async def deactivate(
+        self,
+        params: LicenseDeactivateParams | None = None,
+        **kwargs: Any,
+    ) -> License:
+        """Remove a device activation, freeing up an activation slot."""
+        return await self._client.request(
+            "POST", "/v1/licenses/deactivate", json_body=merge(params, kwargs)
+        )
+
+    async def instances(
+        self,
+        license_id: str,
+        *,
+        page_number: int | None = None,
+        page_size: int | None = None,
+    ) -> LicenseInstanceList:
+        """List the activations (instances) of a license key."""
+        return await self._client.request(
+            "GET",
+            f"/v1/licenses/{license_id}/instances",
+            params=drop_none({"page_number": page_number, "page_size": page_size}),
+        )
+
+    async def iter_instances(
+        self, license_id: str, *, page_size: int = 100
+    ) -> AsyncIterator[LicenseInstance]:
+        """Yield every activation (instance) of a license key."""
+        async for page in iter_pages_async(
+            self.instances, page_size=page_size, filters={"license_id": license_id}
+        ):
+            for item in page["items"]:
+                yield item

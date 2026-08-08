@@ -41,3 +41,9 @@ def test_webhook_server_imports() -> None:
     import examples.webhook_server
 
     assert callable(examples.webhook_server.creem_webhook)
+
+
+def test_async_checkout_flow_imports() -> None:
+    import examples.async_checkout_flow
+
+    assert callable(examples.async_checkout_flow.main)

@@ -31,6 +31,26 @@ creem = Creem()  # reads CREEM_API_KEY from the environment
 
 The environment is derived from the key prefix: `creem_test_` targets `https://test-api.creem.io`, anything else targets production. Pass `base_url` to override. Pass `max_retries=0` to disable retrying; pass `timeout` to change the request timeout.
 
+### Async Client
+
+For async backends (FastAPI, Starlette), use `AsyncCreem` — same resources,
+same params, same errors, everything awaited:
+
+```python
+from creem import AsyncCreem
+
+async with AsyncCreem() as creem:
+    checkout = await creem.checkouts.create(
+        {"product_id": "prod_1", "success_url": "https://x.dev/s"}
+    )
+    for txn in [t async for t in creem.transactions.iter_all()]:
+        ...
+```
+
+`AsyncCreem` supports the same retry semantics, idempotency gating, and
+environment detection as the sync client. The sync `Creem` remains the
+default; use it unless the backend is async.
+
 ### Resources
 
 `creem.products`, `creem.checkouts`, `creem.customers`, `creem.subscriptions`, `creem.transactions`, `creem.discounts`, `creem.licenses`, `creem.credits`, `creem.refunds`, `creem.affiliates`, `creem.stats`, `creem.moderation`. That is all 49 endpoints.

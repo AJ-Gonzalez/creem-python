@@ -20,6 +20,7 @@ corresponding ``*Params`` TypedDict plus keyword overrides.
 from __future__ import annotations
 
 from . import models
+from .async_client import AsyncCreem
 from .client import PROD_BASE_URL, TEST_BASE_URL, Creem
 from .errors import (
     CreemAPIError,
@@ -45,6 +46,7 @@ from .webhooks import (
 __version__ = "0.2.1"
 
 __all__ = [
+    "AsyncCreem",
     "Creem",
     "PROD_BASE_URL",
     "TEST_BASE_URL",

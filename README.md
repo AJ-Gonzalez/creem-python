@@ -28,7 +28,7 @@ from creem import Creem
 creem = Creem()  # reads CREEM_API_KEY from the environment
 ```
 
-Test keys (`creem_test_...`) automatically target the sandbox at `test-api.creem.io` — no config needed. Live keys (`creem_...`) hit production.
+Test keys (`creem_test_...`) automatically target the sandbox at `test-api.creem.io` — no config needed. Live keys (`creem_...`) hit production. Async backends use `AsyncCreem` — same API, everything awaited (`await creem.checkouts.create(...)`).
 
 **Sell something.** Create a checkout session and send your customer to the hosted payment page:
 
@@ -76,6 +76,7 @@ Runnable scripts live in [`examples/`](examples/) — set `CREEM_API_KEY` (test 
 | `webhook_server.py` | FastAPI endpoint with signature verification and grant/revoke dispatch |
 | `customer_credits.py` | Wallet: create account, credit, balance |
 | `browse_and_paginate.py` | Pagination iterators over products and transactions |
+| `async_checkout_flow.py` | The same flow with `AsyncCreem` — for async backends |
 
 ```bash
 CREEM_API_KEY=creem_test_... python examples/checkout_flow.py

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, overload
 
 from ..models import RefundCreateParams, RefundResult
-from .base import APIResource, merge
+from .base import APIResource, AsyncAPIResource, merge
 
 
 class Refunds(APIResource):
@@ -29,5 +29,30 @@ class Refunds(APIResource):
         confirms asynchronously.
         """
         return self._client.request(
+            "POST", "/v1/refunds", json_body=merge(params, kwargs)
+        )
+
+
+class AsyncRefunds(AsyncAPIResource):
+    """Async refund endpoints."""
+
+    @overload
+    async def create(self, params: RefundCreateParams, **kwargs: Any) -> RefundResult: ...
+
+    @overload
+    async def create(self, **kwargs: Any) -> RefundResult: ...
+
+    async def create(
+        self,
+        params: RefundCreateParams | None = None,
+        **kwargs: Any,
+    ) -> RefundResult:
+        """Issue a full refund for a payment, identified by its transaction
+        ID. The remaining refundable amount is resolved automatically.
+
+        The refund status may be ``pending`` when the payment provider
+        confirms asynchronously.
+        """
+        return await self._client.request(
             "POST", "/v1/refunds", json_body=merge(params, kwargs)
         )

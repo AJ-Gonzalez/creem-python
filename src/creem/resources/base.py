@@ -2,11 +2,58 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import AsyncIterator, Iterator
 from typing import TYPE_CHECKING, Any, Callable, Mapping
 
 if TYPE_CHECKING:
+    from ..async_client import AsyncCreem
     from ..client import Creem
+
+
+async def iter_pages_async(
+    fetch: Callable[..., Any],
+    *,
+    page_size: int,
+    filters: Mapping[str, Any],
+) -> AsyncIterator[Any]:
+    """Async variant of :func:`iter_pages`; ``fetch`` is awaited per page."""
+    clean = {
+        key: value
+        for key, value in filters.items()
+        if value is not None and key not in ("page_number", "page_size")
+    }
+    page_number = 1
+    while True:
+        page = await fetch(page_number=page_number, page_size=page_size, **clean)
+        yield page
+        pagination = page.get("pagination") or {}
+        total_pages = pagination.get("total_pages")
+        if total_pages is None or page_number >= total_pages:
+            return
+        page_number += 1
+
+
+async def iter_cursor_pages_async(
+    fetch: Callable[..., Any],
+    *,
+    limit: int,
+    filters: Mapping[str, Any],
+    id_key: str,
+) -> AsyncIterator[Any]:
+    """Async variant of :func:`iter_cursor_pages`; ``fetch`` is awaited per page."""
+    clean = {
+        key: value
+        for key, value in filters.items()
+        if value is not None and key not in ("limit", "starting_after", "ending_before")
+    }
+    starting_after: str | None = None
+    while True:
+        page = await fetch(limit=limit, starting_after=starting_after, **clean)
+        yield page
+        items = page.get("data") or []
+        if not page.get("has_more") or not items:
+            return
+        starting_after = str(items[-1][id_key])
 
 
 def merge(
@@ -87,4 +134,11 @@ class APIResource:
     """Base class for resource groups; holds a reference to the client."""
 
     def __init__(self, client: Creem) -> None:
+        self._client = client
+
+
+class AsyncAPIResource:
+    """Base class for async resource groups; holds the async client."""
+
+    def __init__(self, client: AsyncCreem) -> None:
         self._client = client

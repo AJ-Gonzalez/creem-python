@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, overload
 
 from ..models import ModerationResult, ModerationScreenParams
-from .base import APIResource, merge
+from .base import APIResource, AsyncAPIResource, merge
 
 
 class Moderation(APIResource):
@@ -28,5 +28,31 @@ class Moderation(APIResource):
         """Evaluate a text prompt against content policies before
         generation. The ``decision`` is ``allow``, ``deny``, or ``flag``."""
         return self._client.request(
+            "POST", "/v1/moderation/prompt", json_body=merge(params, kwargs)
+        )
+
+
+class AsyncModeration(AsyncAPIResource):
+    """Async moderation endpoints.
+
+    Experimental: this endpoint may change.
+    """
+
+    @overload
+    async def screen(
+        self, params: ModerationScreenParams, **kwargs: Any
+    ) -> ModerationResult: ...
+
+    @overload
+    async def screen(self, **kwargs: Any) -> ModerationResult: ...
+
+    async def screen(
+        self,
+        params: ModerationScreenParams | None = None,
+        **kwargs: Any,
+    ) -> ModerationResult:
+        """Evaluate a text prompt against content policies before
+        generation. The ``decision`` is ``allow``, ``deny``, or ``flag``."""
+        return await self._client.request(
             "POST", "/v1/moderation/prompt", json_body=merge(params, kwargs)
         )

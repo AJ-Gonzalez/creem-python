@@ -13,6 +13,10 @@ requests carrying an idempotency key (``Idempotency-Key`` header,
 ``request_id`` or ``idempotency_key`` in the body). Pass ``idempotent=True``
 to ``request`` to retry other requests; pass ``max_retries=0`` to disable
 retrying entirely.
+
+The pure request logic (idempotency detection, backoff calculation, error
+mapping) lives in module-level functions shared with :class:`AsyncCreem` in
+``async_client.py``.
 """
 
 from __future__ import annotations
@@ -21,7 +25,7 @@ import os
 import random
 import time
 from types import TracebackType
-from typing import Any, Mapping, TypeVar, cast
+from typing import Any, Mapping, NoReturn, TypeVar, cast
 
 import httpx
 
@@ -45,6 +49,76 @@ TEST_KEY_PREFIX = "creem_test_"
 RETRYABLE_STATUSES = (429, 500, 502, 503, 504)
 # Body keys that make a request safe to retry.
 IDEMPOTENCY_BODY_KEYS = ("request_id", "idempotency_key")
+
+
+def is_idempotent_request(
+    method: str,
+    json_body: Mapping[str, Any] | None,
+    headers: Mapping[str, str] | None,
+) -> bool:
+    """Return whether a request is safe to repeat after a failed attempt."""
+    if method.upper() == "GET":
+        return True
+    if headers and any(key.lower() == "idempotency-key" for key in headers):
+        return True
+    if json_body and any(key in json_body for key in IDEMPOTENCY_BODY_KEYS):
+        return True
+    return False
+
+
+def retry_delay(backoff_base: float, attempt: int, response: httpx.Response | None) -> float:
+    """Backoff delay for a retry: exponential, jittered, and never below a
+    ``Retry-After`` header on 429 responses."""
+    delay: float = backoff_base * (2**attempt)
+    delay *= random.uniform(0.5, 1.0)
+    if response is not None:
+        retry_after = response.headers.get("Retry-After")
+        if retry_after is not None:
+            try:
+                retry_seconds: float | None = float(retry_after)
+            except ValueError:
+                retry_seconds = None  # Retry-After may be an HTTP-date; use backoff
+            if retry_seconds is not None:
+                delay = max(delay, retry_seconds)
+    return delay
+
+
+def raise_for_error(response: httpx.Response) -> NoReturn:
+    """Raise the typed error for a non-2xx response."""
+    payload: Any = None
+    try:
+        payload = response.json()
+    except ValueError:
+        payload = None
+    status = response.status_code
+    trace_id: str | None = None
+    error: str | None = None
+    messages: list[str] | None = None
+    if isinstance(payload, dict):
+        raw_messages = payload.get("message")
+        if isinstance(raw_messages, str):
+            messages = [raw_messages]
+        elif isinstance(raw_messages, list):
+            messages = [str(m) for m in raw_messages]
+        trace_id = payload.get("trace_id") if isinstance(payload.get("trace_id"), str) else None
+        error = payload.get("error") if isinstance(payload.get("error"), str) else None
+        detail = ", ".join(messages) if messages else (error or f"HTTP {status}")
+    else:
+        detail = f"HTTP {status}"
+    error_cls: type[CreemAPIError]
+    if status == 400:
+        error_cls = CreemValidationError
+    elif status in (401, 403):
+        error_cls = CreemAuthError
+    elif status == 404:
+        error_cls = CreemNotFoundError
+    elif status == 429:
+        error_cls = CreemRateLimitError
+    elif status >= 500:
+        error_cls = CreemServerError
+    else:
+        error_cls = CreemAPIError
+    raise error_cls(status, detail, trace_id=trace_id, error=error, messages=messages) from None
 
 
 class Creem:
@@ -140,7 +214,7 @@ class Creem:
         it is a GET or carries an idempotency key (see the module docs).
         """
         if idempotent is None:
-            idempotent = self._is_idempotent_request(method, json_body, headers)
+            idempotent = is_idempotent_request(method, json_body, headers)
         request_headers = {"x-api-key": self.api_key, "Accept": "application/json"}
         if headers:
             request_headers.update(headers)
@@ -158,7 +232,7 @@ class Creem:
                 # requests that are safe to repeat.
                 if not idempotent or attempt >= self.max_retries:
                     raise
-                time.sleep(self._retry_delay(attempt, None))
+                time.sleep(retry_delay(self.backoff_base, attempt, None))
                 attempt += 1
                 continue
             if (
@@ -166,80 +240,16 @@ class Creem:
                 and idempotent
                 and attempt < self.max_retries
             ):
-                time.sleep(self._retry_delay(attempt, response))
+                time.sleep(retry_delay(self.backoff_base, attempt, response))
                 attempt += 1
                 continue
             break
 
         if response.is_error:
-            self._raise_for_error(response)
+            raise_for_error(response)
         if response.status_code == 204 or not response.content:
             return cast(T, None)
         return cast(T, response.json())
-
-    @staticmethod
-    def _is_idempotent_request(
-        method: str,
-        json_body: Mapping[str, Any] | None,
-        headers: Mapping[str, str] | None,
-    ) -> bool:
-        if method.upper() == "GET":
-            return True
-        if headers and any(key.lower() == "idempotency-key" for key in headers):
-            return True
-        if json_body and any(key in json_body for key in IDEMPOTENCY_BODY_KEYS):
-            return True
-        return False
-
-    def _retry_delay(self, attempt: int, response: httpx.Response | None) -> float:
-        delay: float = self.backoff_base * (2**attempt)
-        delay *= random.uniform(0.5, 1.0)
-        if response is not None:
-            retry_after = response.headers.get("Retry-After")
-            if retry_after is not None:
-                try:
-                    retry_seconds: float | None = float(retry_after)
-                except ValueError:
-                    retry_seconds = None  # Retry-After may be an HTTP-date; use backoff
-                if retry_seconds is not None:
-                    delay = max(delay, retry_seconds)
-        return delay
-
-    def _raise_for_error(self, response: httpx.Response) -> None:
-        payload: Any = None
-        try:
-            payload = response.json()
-        except ValueError:
-            payload = None
-        status = response.status_code
-        trace_id: str | None = None
-        error: str | None = None
-        messages: list[str] | None = None
-        if isinstance(payload, dict):
-            raw_messages = payload.get("message")
-            if isinstance(raw_messages, str):
-                messages = [raw_messages]
-            elif isinstance(raw_messages, list):
-                messages = [str(m) for m in raw_messages]
-            trace_id = payload.get("trace_id") if isinstance(payload.get("trace_id"), str) else None
-            error = payload.get("error") if isinstance(payload.get("error"), str) else None
-            detail = ", ".join(messages) if messages else (error or f"HTTP {status}")
-        else:
-            detail = f"HTTP {status}"
-        error_cls: type[CreemAPIError]
-        if status == 400:
-            error_cls = CreemValidationError
-        elif status in (401, 403):
-            error_cls = CreemAuthError
-        elif status == 404:
-            error_cls = CreemNotFoundError
-        elif status == 429:
-            error_cls = CreemRateLimitError
-        elif status >= 500:
-            error_cls = CreemServerError
-        else:
-            error_cls = CreemAPIError
-        raise error_cls(status, detail, trace_id=trace_id, error=error, messages=messages) from None
 
     def close(self) -> None:
         """Close the underlying HTTP client."""
