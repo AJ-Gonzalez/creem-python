@@ -40,13 +40,13 @@ Documentation = "https://docs.creem.io/api-reference"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools.package-data]
-creem = ["py.typed"]
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q -m 'not live'"
+markers = [
+    "live: hits the real test-api.creem.io sandbox (requires CREEM_API_KEY; run with -m live)",
+]
+
 
 [tool.mypy]
 python_version = "3.11"
