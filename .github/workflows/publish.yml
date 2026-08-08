@@ -1,10 +1,12 @@
 # Publish the creem SDK.
 #
-# Currently publishes ONLY to Test PyPI (test.pypi.org) — "test pypi first".
-# Triggered by version tags (v0.1.0, ...) or manually via workflow_dispatch.
+# A version tag (v0.1.0, ...) or a manual workflow_dispatch run:
+#   quality          - mypy, pytest, build sdist + wheel
+#   publish-testpypi - upload to Test PyPI (test.pypi.org)
+#   publish-pypi     - upload to PyPI (pypi.org)
 #
 # Uses Trusted Publishing (OIDC): no API tokens stored in the repo.
-# One-time setup on test.pypi.org: create the `creem` project, then
+# One-time setup per index: create the `creem` project on the index, then
 # Publishing -> "Add a new pending publisher":
 #   PyPI project: creem
 #   Publisher: GitHub
@@ -12,10 +14,7 @@
 #   Repository: creem-python
 #   Workflow: publish.yml
 #   Environment: (leave empty)
-#
-# To enable the real PyPI release later, copy the publish-testpypi job,
-# drop `repository-url`, and register the same pending publisher on
-# pypi.org. Optionally gate it behind a manual approval environment.
+# Register the pending publisher on BOTH test.pypi.org and pypi.org.
 
 name: Publish
 
@@ -63,3 +62,17 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # trusted publishing: mint an OIDC token for PyPI
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
