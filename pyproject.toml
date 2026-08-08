@@ -66,8 +66,6 @@ extend-ignore = ["E203", "W503"]
 ignore = ["models.py"]
 max-args = 8
 max-line-length = 100
-too-many-instance-attributes = 0
-too-many-locals = 0
 
 [tool.pylint."messages control"]
 disable = [

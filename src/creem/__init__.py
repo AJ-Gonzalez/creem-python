@@ -37,6 +37,7 @@ from .models import (
     Refund,
     StatsSummary,
     Subscription,
+    SubscriptionCancelParams,
     Transaction,
     WebhookSubscription,
 )
