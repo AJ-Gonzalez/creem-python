@@ -4,6 +4,8 @@ A comfy python wrapper around the Creem REST API.
 
 Will hopefully be official at some point. 
 
+**Status: alpha.** The API surface is still settling — expect changes before 1.0. The author is dogfooding it with at least one real product; use with care, but it does work.
+
 ## Installing
 
 Requires Python 3.11+.
