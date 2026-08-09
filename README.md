@@ -4,7 +4,17 @@ A comfy python wrapper around the Creem REST API.
 
 Will hopefully be official at some point. 
 
-**Status: alpha.** The API surface is still settling — expect changes before 1.0. The author is dogfooding it with at least one real product; use with care, but it does work.
+Supports both sync and async flows. 
+
+**Status: alpha.** 
+
+Expect mostly minor changes before 1.0. 
+
+The author is dogfooding it with at least one real product.
+
+Shoutout to [Creem](https://creem.io) for being cool, hope they see this. 
+
+***If the community at large needs python 3.8 support it will be added, otherwise it's 3.11 or above.***
 
 ## Installing
 
@@ -91,3 +101,9 @@ See the full reference in [API_REFERENCE](API_REFERENCE.md)
 ## Documentation for Agents
 
 AI agents integrating or extending this SDK should read [docs/for-agents.md](docs/for-agents.md) — it covers the mental model, conventions, integration flows, and gotchas. For the complete API contract, see [API_REFERENCE.md](API_REFERENCE.md). Release history: [CHANGELOG.md](CHANGELOG.md).
+
+
+## Contributing
+
+Please raise any issues you have. Feature requests are welcome as well. 
+PR's welcome. 
