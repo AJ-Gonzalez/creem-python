@@ -30,6 +30,8 @@ For development, install from the repo with test tooling:
 pip install -e ".[dev]"
 ```
 
+View [creem on PyPI.](https://pypi.org/project/creem/)
+
 ## Quickstart
 
 Grab your API key from the [dashboard](https://creem.io/dashboard/developers), then:
